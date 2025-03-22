@@ -76,7 +76,7 @@ jobs:
           go-version-file: 'go.mod'
       - name: Check License Header
         run: make license-check
-      - name: Update dependencies 
+      - name: Update dependencies
         if: steps.cache-go.outputs.cache-hit != 'true'
         run: GOPROXY=https://proxy.golang.org go mod download
       - name: Check requirements
@@ -120,6 +120,27 @@ jobs:
         run: |
           docker exec minio mc mb local/bydb233
           docker exec minio mc version enable local/bydb233
+
+      - name: Configure AWS for MinIO
+        run: |
+          mkdir -p ~/.aws
+          cat << EOF > ~/.aws/config
+          [profile banyandb]
+          region = eu-north-1
+          output = json
+          max_attempts = 5
+          endpoint_url = http://localhost:9000
+          EOF
+
+          cat << EOF > ~/.aws/credentials
+          [banyandb]
+          aws_access_key_id = OjezEU7caGd8H9zSG4Ov
+          aws_secret_access_key = 9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH
+          EOF
+
+          chmod 600 ~/.aws/credentials
+
+
   build:
     name: Build
     runs-on: ubuntu-20.04
@@ -155,7 +176,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
-      - name: Update dependencies 
+      - name: Update dependencies
         if: steps.cache-go.outputs.cache-hit != 'true'
         run: GOPROXY=https://proxy.golang.org go mod download
       - name: Generate codes
@@ -169,7 +190,7 @@ jobs:
     with:
       options: --fail-fast --label-filter \\!slow
       timeout-minutes: 30
-      
+
   result:
     name: Continuous Integration
     runs-on: ubuntu-20.04
