@@ -25,8 +25,8 @@ runs:
     - name: Start MinIO server
       run: |
         docker run -d \
-          -p 9000:9000 \
           --name minio \
+          -p 9000:9000 \
           -e "MINIO_ROOT_USER=OjezEU7caGd8H9zSG4Ov" \
           -e "MINIO_ROOT_PASSWORD=9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH" \
           quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1 \
@@ -71,7 +71,7 @@ runs:
     - name: Configure AWS for MinIO
       run: |
         mkdir -p ~/.aws
-        cat << EOF > ~/.aws/config
+        cat <<EOF | sed 's/^ *//' > ~/.aws/config
         [profile banyandb]
         region = eu-north-1
         output = json
@@ -80,10 +80,11 @@ runs:
         addressing_style = path
         EOF
 
-        cat << EOF > ~/.aws/credentials
+        cat <<EOF | sed 's/^ *//' > ~/.aws/credentials
         [banyandb]
         aws_access_key_id = OjezEU7caGd8H9zSG4Ov
         aws_secret_access_key = 9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH
         EOF
+
         chmod 600 ~/.aws/credentials
       shell: bash
