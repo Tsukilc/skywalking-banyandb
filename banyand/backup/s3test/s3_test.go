@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package backup
+package s3test
 
 import (
 	"context"
@@ -29,7 +29,11 @@ import (
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote/s3"
 )
 
-var p = path.Join(defaultBucket, basePath)
+var (
+	defaultBucket = "bydb233"
+	basePath      = "basepath"
+	p             = path.Join(defaultBucket, basePath)
+)
 
 func TestUploadAndDownload(t *testing.T) {
 	fs, err := s3.NewFS(p)

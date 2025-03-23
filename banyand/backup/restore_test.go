@@ -20,7 +20,6 @@ package backup
 import (
 	"context"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -30,12 +29,6 @@ import (
 	"github.com/apache/skywalking-banyandb/banyand/internal/storage"
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote"
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote/local"
-	"github.com/apache/skywalking-banyandb/pkg/fs/remote/s3"
-)
-
-var (
-	defaultBucket = "bydb233"
-	basePath      = "basepath"
 )
 
 func testRestoreDownload(t *testing.T, fsProvider func() (remote.FS, error)) {
@@ -77,13 +70,6 @@ func TestRestoreDownload(t *testing.T) {
 	})
 }
 
-func TestRestoreDownloadS3(t *testing.T) {
-	testRestoreDownload(t, func() (remote.FS, error) {
-		remoteDir := path.Join(defaultBucket, t.TempDir())
-		return s3.NewFS(remoteDir)
-	})
-}
-
 func testRestoreDelete(t *testing.T, fsProvider func() (remote.FS, error)) {
 	localRestoreDir := t.TempDir()
 	fs, err := fsProvider()
@@ -117,12 +103,5 @@ func TestRestoreDelete(t *testing.T) {
 	testRestoreDelete(t, func() (remote.FS, error) {
 		remoteDir := t.TempDir()
 		return local.NewFS(remoteDir)
-	})
-}
-
-func TestRestoreDeleteS3(t *testing.T) {
-	testRestoreDelete(t, func() (remote.FS, error) {
-		remoteDir := path.Join(defaultBucket, t.TempDir())
-		return s3.NewFS(remoteDir)
 	})
 }
