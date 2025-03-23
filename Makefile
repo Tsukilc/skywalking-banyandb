@@ -76,7 +76,7 @@ test-ci: $(GINKGO) ## Run the unit tests in CI
 	  -ldflags \
 	  "-X github.com/apache/skywalking-banyandb/pkg/test/flags.eventuallyTimeout=30s -X github.com/apache/skywalking-banyandb/pkg/test/flags.LogLevel=error" \
 	  $(TEST_CI_OPTS) \
-	  --skip "banyand/backup/s3Test" \
+	  --skip "banyand/backup/s3test" \
 	  ./...
 
 
