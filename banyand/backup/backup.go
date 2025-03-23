@@ -38,8 +38,8 @@ import (
 	"github.com/apache/skywalking-banyandb/banyand/backup/snapshot"
 	"github.com/apache/skywalking-banyandb/pkg/config"
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote"
-	"github.com/apache/skywalking-banyandb/pkg/fs/remote/aws"
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote/local"
+	"github.com/apache/skywalking-banyandb/pkg/fs/remote/s3"
 	"github.com/apache/skywalking-banyandb/pkg/logger"
 	"github.com/apache/skywalking-banyandb/pkg/timestamp"
 	"github.com/apache/skywalking-banyandb/pkg/version"
@@ -160,7 +160,7 @@ func newFS(dest string) (remote.FS, error) {
 	case "file":
 		return local.NewFS(u.Path)
 	case "s3":
-		return aws.NewFS(u.Path)
+		return s3.NewFS(u.Path)
 	default:
 		return nil, fmt.Errorf("unsupported scheme: %s", u.Scheme)
 	}

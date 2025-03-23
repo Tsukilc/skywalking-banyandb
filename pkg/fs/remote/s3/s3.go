@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Package aws provides an AWS S3 file system implementation.
-package aws
+// Package s3 provides an AWS S3 file system implementation.
+package s3
 
 import (
 	"context"
