@@ -54,6 +54,11 @@ runs:
         docker exec minio mc version enable local/bydb233
       shell: bash
 
+    - name: Verify bucket existence
+      run: |
+        docker exec minio mc ls local/bydb233
+      shell: bash
+
     - name: Configure AWS for MinIO
       run: |
         mkdir -p ~/.aws
@@ -63,6 +68,7 @@ runs:
         output = json
         max_attempts = 5
         endpoint_url = http://localhost:9000
+        addressing_style = path
         EOF
 
         cat << EOF > ~/.aws/credentials
