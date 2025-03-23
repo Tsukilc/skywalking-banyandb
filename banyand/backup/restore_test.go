@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	defaultBucket = "local/bydb233"
+	defaultBucket = "bydb233"
 	basePath      = "basepath"
 )
 

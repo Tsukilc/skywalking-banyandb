@@ -1,0 +1,108 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: S3 Integration Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: S3 Test
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Start MinIO server
+        run: |
+          docker run -d \
+            --name minio \
+            -p 9000:9000 \
+            -e "MINIO_ROOT_USER=OjezEU7caGd8H9zSG4Ov" \
+            -e "MINIO_ROOT_PASSWORD=9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH" \
+            quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1 \
+            server /data
+
+      - name: Wait for MinIO
+        run: |
+          timeout=60
+          interval=5
+          until curl -s http://localhost:9000/minio/health/ready; do
+            sleep $interval
+            timeout=$((timeout - interval))
+            if [ $timeout -le 0 ]; then
+              echo "MinIO failed to start in time"
+              exit 1
+            fi
+          done
+
+      - name: Configure MinIO
+        run: |
+          docker exec minio mc alias set local \
+            http://localhost:9000 \
+            "OjezEU7caGd8H9zSG4Ov" \
+            "9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH" \
+            --api s3v4 \
+            --insecure
+
+      - name: Create test bucket
+        run: |
+          docker exec minio mc mb local/bydb233
+          docker exec minio mc version enable local/bydb233
+
+      - name: Configure AWS credentials
+        run: |
+          mkdir -p ~/.aws
+          cat > ~/.aws/config <<EOF
+          [profile banyandb]
+          region = eu-north-1
+          output = json
+          max_attempts = 5
+          endpoint_url = http://localhost:9000
+          addressing_style = path
+          EOF
+
+          cat > ~/.aws/credentials <<EOF
+          [banyandb]
+          aws_access_key_id = OjezEU7caGd8H9zSG4Ov
+          aws_secret_access_key = 9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH
+          EOF
+          chmod 600 ~/.aws/credentials
+
+      - name: Run S3 tests
+        run: |
+          go test -v ./pkg/fs/remote/s3/... --cover --covermode atomic --coverprofile=coverage.out
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.out
