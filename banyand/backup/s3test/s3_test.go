@@ -19,14 +19,16 @@ package s3test
 
 import (
 	"context"
+	"github.com/apache/skywalking-banyandb/pkg/fs/remote"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-	"testing"
 
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote/s3"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var (
@@ -35,92 +37,71 @@ var (
 	p             = path.Join(defaultBucket, basePath)
 )
 
-func TestUploadAndDownload(t *testing.T) {
-	fs, err := s3.NewFS(p)
-	if err != nil {
-		t.Fatalf("failed to create AWS S3 FS: %v", err)
-	}
-	defer fs.Close()
+var _ = Describe("S3 File System", func() {
+	var fs remote.FS
 
-	// Define remote and local paths
-	remoteFilePath := "test.txt"
-	localFilePath := filepath.Join(t.TempDir(), "test.txt")
-	content := "hello"
+	BeforeEach(func() {
+		var err error
+		fs, err = s3.NewFS(p)
+		Expect(err).NotTo(HaveOccurred(), "failed to create AWS S3 FS")
+	})
 
-	// Create a local file
-	err = os.WriteFile(localFilePath, []byte(content), 0o600)
-	if err != nil {
-		t.Fatalf("failed to write local file: %v", err)
-	}
+	AfterEach(func() {
+		fs.Close()
+	})
 
-	// Upload the file to S3
-	file, err := os.Open(localFilePath)
-	if err != nil {
-		t.Fatalf("failed to open local file: %v", err)
-	}
-	defer file.Close()
+	Context("Upload and Download", func() {
+		It("should upload and download a file successfully", func() {
+			remoteFilePath := "test.txt"
+			localFilePath := filepath.Join(GinkgoT().TempDir(), "test.txt")
+			content := "hello"
 
-	err = fs.Upload(context.Background(), remoteFilePath, file)
-	if err != nil {
-		t.Fatalf("failed to upload file: %v", err)
-	}
+			// Create a local file
+			err := os.WriteFile(localFilePath, []byte(content), 0o600)
+			Expect(err).NotTo(HaveOccurred(), "failed to write local file")
 
-	// Download the file from S3
-	downloadedFile, err := fs.Download(context.Background(), remoteFilePath)
-	if err != nil {
-		t.Fatalf("failed to download file: %v", err)
-	}
-	defer downloadedFile.Close()
+			// Upload the file
+			file, err := os.Open(localFilePath)
+			Expect(err).NotTo(HaveOccurred(), "failed to open local file")
+			defer file.Close()
 
-	downloadedContent, err := io.ReadAll(downloadedFile)
-	if err != nil {
-		t.Fatalf("failed to read downloaded file: %v", err)
-	}
+			err = fs.Upload(context.Background(), remoteFilePath, file)
+			Expect(err).NotTo(HaveOccurred(), "failed to upload file")
 
-	if string(downloadedContent) != content {
-		t.Fatalf("expected content %q, got %q", content, string(downloadedContent))
-	}
-}
+			// Download the file
+			downloadedFile, err := fs.Download(context.Background(), remoteFilePath)
+			Expect(err).NotTo(HaveOccurred(), "failed to download file")
+			defer downloadedFile.Close()
 
-func TestList(t *testing.T) {
-	fs, err := s3.NewFS(p)
-	if err != nil {
-		t.Fatalf("failed to create AWS S3 FS: %v", err)
-	}
-	defer fs.Close()
+			downloadedContent, err := io.ReadAll(downloadedFile)
+			Expect(err).NotTo(HaveOccurred(), "failed to read downloaded file")
 
-	// List files in the S3 bucket
-	_, err = fs.List(context.Background(), "")
-	if err != nil {
-		t.Fatalf("failed to list files: %v", err)
-	}
-}
+			Expect(string(downloadedContent)).To(Equal(content), "downloaded content mismatch")
+		})
+	})
 
-func TestDelete(t *testing.T) {
-	fs, err := s3.NewFS(p)
-	if err != nil {
-		t.Fatalf("failed to create AWS S3 FS: %v", err)
-	}
-	defer fs.Close()
+	Context("List", func() {
+		It("should list files in the S3 bucket", func() {
+			_, err := fs.List(context.Background(), "")
+			Expect(err).NotTo(HaveOccurred(), "failed to list files")
+		})
+	})
 
-	// Define remote path
-	remoteFilePath := "test.txt"
+	Context("Delete", func() {
+		It("should delete a file from S3", func() {
+			remoteFilePath := "test.txt"
 
-	// Upload a file to S3
-	err = fs.Upload(context.Background(), remoteFilePath, strings.NewReader("hello"))
-	if err != nil {
-		t.Fatalf("failed to upload file: %v", err)
-	}
+			// Upload a file
+			err := fs.Upload(context.Background(), remoteFilePath, strings.NewReader("hello"))
+			Expect(err).NotTo(HaveOccurred(), "failed to upload file")
 
-	// Delete the file from S3
-	err = fs.Delete(context.Background(), remoteFilePath)
-	if err != nil {
-		t.Fatalf("failed to delete file: %v", err)
-	}
+			// Delete the file
+			err = fs.Delete(context.Background(), remoteFilePath)
+			Expect(err).NotTo(HaveOccurred(), "failed to delete file")
 
-	// Verify the file was deleted
-	_, err = fs.Download(context.Background(), remoteFilePath)
-	if err == nil {
-		t.Fatalf("expected error when downloading deleted file, got none")
-	}
-}
+			// Verify the file was deleted
+			_, err = fs.Download(context.Background(), remoteFilePath)
+			Expect(err).To(HaveOccurred(), "expected error when downloading deleted file, got none")
+		})
+	})
+})
