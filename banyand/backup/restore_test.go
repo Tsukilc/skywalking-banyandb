@@ -27,14 +27,14 @@ import (
 	commonv1 "github.com/apache/skywalking-banyandb/api/proto/banyandb/common/v1"
 	"github.com/apache/skywalking-banyandb/banyand/backup/snapshot"
 	"github.com/apache/skywalking-banyandb/banyand/internal/storage"
+	"github.com/apache/skywalking-banyandb/pkg/fs/remote"
 	"github.com/apache/skywalking-banyandb/pkg/fs/remote/local"
 )
 
-func TestRestoreDownload(t *testing.T) {
-	remoteDir := t.TempDir()
+func testRestoreDownload(t *testing.T, fsProvider func() (remote.FS, error)) {
 	localRestoreDir := t.TempDir()
 
-	fs, err := local.NewFS(remoteDir)
+	fs, err := fsProvider()
 	if err != nil {
 		t.Fatalf("failed to create remote FS: %v", err)
 	}
@@ -42,6 +42,7 @@ func TestRestoreDownload(t *testing.T) {
 	timeDir := "2023-10-10"
 	remoteFilePath := filepath.Join(timeDir, snapshot.CatalogName(commonv1.Catalog_CATALOG_STREAM), "test.txt")
 	content := "hello"
+
 	err = fs.Upload(context.Background(), remoteFilePath, strings.NewReader(content))
 	if err != nil {
 		t.Fatalf("failed to upload file: %v", err)
@@ -62,11 +63,16 @@ func TestRestoreDownload(t *testing.T) {
 	}
 }
 
-func TestRestoreDelete(t *testing.T) {
-	remoteDir := t.TempDir()
-	localRestoreDir := t.TempDir()
+func TestRestoreDownload(t *testing.T) {
+	testRestoreDownload(t, func() (remote.FS, error) {
+		remoteDir := t.TempDir()
+		return local.NewFS(remoteDir)
+	})
+}
 
-	fs, err := local.NewFS(remoteDir)
+func testRestoreDelete(t *testing.T, fsProvider func() (remote.FS, error)) {
+	localRestoreDir := t.TempDir()
+	fs, err := fsProvider()
 	if err != nil {
 		t.Fatalf("failed to create remote FS: %v", err)
 	}
@@ -75,6 +81,7 @@ func TestRestoreDelete(t *testing.T) {
 	if err = os.MkdirAll(streamDir, storage.DirPerm); err != nil {
 		t.Fatalf("failed to create local stream directory: %v", err)
 	}
+
 	extraFilePath := filepath.Join(streamDir, "old.txt")
 	extraContent := "stale"
 	if err = os.WriteFile(extraFilePath, []byte(extraContent), 0o600); err != nil {
@@ -90,4 +97,11 @@ func TestRestoreDelete(t *testing.T) {
 	if _, err := os.Stat(extraFilePath); !os.IsNotExist(err) {
 		t.Fatalf("expected extra file %q to be deleted", extraFilePath)
 	}
+}
+
+func TestRestoreDelete(t *testing.T) {
+	testRestoreDelete(t, func() (remote.FS, error) {
+		remoteDir := t.TempDir()
+		return local.NewFS(remoteDir)
+	})
 }

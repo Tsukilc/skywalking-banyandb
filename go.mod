@@ -3,8 +3,13 @@ module github.com/apache/skywalking-banyandb
 go 1.24
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
 	github.com/RoaringBitmap/roaring v1.9.4
 	github.com/apache/skywalking-cli v0.0.0-20240227151024-ee371a210afe
+	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2/config v1.29.9
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/benbjohnson/clock v1.3.0
 	github.com/blugelabs/bluge v0.2.2
 	github.com/cespare/xxhash/v2 v2.3.0
@@ -38,7 +43,7 @@ require (
 	go.uber.org/mock v0.5.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
-	golang.org/x/mod v0.23.0
+	golang.org/x/mod v0.24.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250212204824-5a70512c5d8b
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250212204824-5a70512c5d8b
 	google.golang.org/grpc v1.70.0
@@ -48,13 +53,34 @@ require (
 )
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.17.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
+	github.com/AzureAD/microsoft-authentication-library-for-go v1.3.3 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.2 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.62 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.25.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
+	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/kamstrup/intmap v0.5.1 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/machinebox/graphql v0.2.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
