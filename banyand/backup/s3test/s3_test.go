@@ -84,7 +84,7 @@ var _ = Describe("S3 File System", func() {
 
 	Context("List", func() {
 		It("should list files in the S3 bucket", func() {
-			_, err := fs.List(context.Background(), "")
+			_, err := fs.List(context.Background(), basePath)
 			Expect(err).NotTo(HaveOccurred(), "failed to list files")
 		})
 	})
