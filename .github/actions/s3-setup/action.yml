@@ -31,10 +31,12 @@ runs:
           -e "MINIO_ROOT_PASSWORD=9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH" \
           quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z-cpuv1 \
           server /data --console-address ":9001"
+      shell: bash
 
     - name: Wait for service readiness
       run: |
         until curl -s http://localhost:9000/minio/health/live; do sleep 5; done
+      shell: bash
 
     - name: Configure MinIO client
       run: |
@@ -44,11 +46,13 @@ runs:
           "9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH" \
           --api s3v4 \
           --insecure
+      shell: bash
 
     - name: Create persistent bucket
       run: |
         docker exec minio mc mb local/bydb233
         docker exec minio mc version enable local/bydb233
+      shell: bash
 
     - name: Configure AWS for MinIO
       run: |
@@ -67,3 +71,4 @@ runs:
         aws_secret_access_key = 9tWu8XB8Cemol44pVGd661ZkyAwJ1OPNd6BC0tmH
         EOF
         chmod 600 ~/.aws/credentials
+      shell: bash
