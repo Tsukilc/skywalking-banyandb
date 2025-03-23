@@ -42,7 +42,6 @@ jobs:
       - name: Install Ginkgo
         run: |
           go install github.com/onsi/ginkgo/v2/ginkgo@latest
-          go install github.com/onsi/gomega@latest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
