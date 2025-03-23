@@ -70,7 +70,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Call S3 Setup
-        uses: ./.github/workflows/s3-setup.yml
+        uses: ./.github/actions/s3-setup
       - name: Update dependencies
         if: steps.cache-go.outputs.cache-hit != 'true'
         run: GOPROXY=https://proxy.golang.org go mod download
