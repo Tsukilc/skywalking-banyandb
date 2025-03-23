@@ -74,6 +74,8 @@ var _ = Describe("S3 File System", func() {
 			defer downloadedFile.Close()
 
 			downloadedContent, err := io.ReadAll(downloadedFile)
+			GinkgoWriter.Println("Downloaded Content:", string(downloadedContent))
+
 			Expect(err).NotTo(HaveOccurred(), "failed to read downloaded file")
 
 			Expect(string(downloadedContent)).To(Equal(content), "downloaded content mismatch")
